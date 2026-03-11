@@ -2,11 +2,10 @@ name: BDO SEA Boss Timer
 
 on:
   schedule:
-    # Runs every 30 minutes — GitHub Actions minimum reliable interval
-    # (GitHub doesn't guarantee exact timing, but it's close enough)
-    - cron: "*/30 * * * *"
+    # Runs every 5 minutes for accurate 15min and 5min alerts.
+    - cron: "*/5 * * * *"
 
-  # Lets you click "Run workflow" manually in GitHub to test it
+  # Lets you click "Run workflow" manually in GitHub to test it anytime
   workflow_dispatch:
 
 jobs:
