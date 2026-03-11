@@ -122,20 +122,6 @@ BOSS_INFO = {
         "drops":    "Flame of the Primordial ★, Primordial Crystal, Asadal Belt, Gold Bars",
         "tag":      "loml",
     },
-    "Quint": {
-        "color":    0x7F8C8D,
-        "icon":     "https://mmotimer.com/img/quint_big.png",
-        "location": "Quint Hill (northern Mediah)",
-        "drops":    "Hunter Seals, Black Stones, Ancient Relic Crystal Shards",
-        "tag":      "classic",
-    },
-    "Muraka": {
-        "color":    0x795548,
-        "icon":     "https://mmotimer.com/img/muraka_big.png",
-        "location": "Muraka's Lair (northern Balenos)",
-        "drops":    "Hunter Seals, Black Stones, Ancient Relic Crystal Shards",
-        "tag":      "classic",
-    },
 }
 
 # ─────────────────────────────────────────────
@@ -189,7 +175,6 @@ SEA_SCHEDULE = [
     {"day": 5, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
     {"day": 5, "hour": 15, "min":  0, "bosses": ["Kutum",    "Sangoon"]},
     {"day": 5, "hour": 18, "min":  0, "bosses": ["Garmoth"]},
-    {"day": 5, "hour": 19, "min":  0, "bosses": ["Quint",    "Muraka"]},
     {"day": 5, "hour": 20, "min":  0, "bosses": ["Karanda",  "Bulgasal"]},
     # ── Sunday ──────────────────────────────────────────────────────────
     {"day": 6, "hour":  1, "min": 30, "bosses": ["Kzarka",   "Golden Pig King"]},
@@ -266,7 +251,7 @@ def build_embed(boss: str, spawn_dt: datetime, alert_min: int) -> dict:
         "thumbnail":   {"url": info.get("icon", "")},
         "footer": {
             "text":     "BDO SEA • garmoth.com/boss-timer",
-            "icon_url": "https://garmoth.com/favicon.ico",
+            "icon_url": "https://assets.garmoth.com/emotes/laugh.png",
         },
         "timestamp": spawn_dt.isoformat(),
     }
@@ -292,7 +277,7 @@ def send_alert(bosses: list, spawn_dt: datetime, alert_min: int):
         chunk   = embeds[i:i+10]
         payload = {
             "username":   "BDO SEA Boss Timer",
-            "avatar_url": "https://garmoth.com/favicon.ico",
+            "avatar_url": "https://assets.garmoth.com/emotes/laugh.png",
             "embeds":     chunk,
         }
         if content and i == 0:
