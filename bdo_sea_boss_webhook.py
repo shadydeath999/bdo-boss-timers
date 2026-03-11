@@ -231,7 +231,7 @@ def build_embed(boss, spawn_dt, alert_type):
         title     = f"⏰  {boss} — 15 Minutes"
         time_line = "Spawning in **~15 minutes**"
 
-    loml_note = "\n> 🌅 *LOML boss — requires party, once-per-week loot*" if is_loml else ""
+    loml_note = "\n> 🌅 *LOML boss — once-per-week loot*" if is_loml else ""
 
     description = (
         f"{time_line}\n"
