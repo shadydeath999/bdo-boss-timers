@@ -37,7 +37,6 @@ UTC8 = timezone(timedelta(hours=8))
 #  BOSS METADATA
 # ─────────────────────────────────────────────
 BOSS_INFO = {
-    # ── Classic bosses ──────────────────────────────────────────────────
     "Kzarka": {
         "color":    0xE74C3C,
         "icon":     "https://mmotimer.com/img/kzarka_big.png",
@@ -101,7 +100,6 @@ BOSS_INFO = {
         "drops":    "Hunter Seals, Cron Stones, Silver",
         "tag":      "classic",
     },
-    # ── Land of the Morning Light (LOML) bosses ──────────────────────────
     "Bulgasal": {
         "color":    0xE67E22,
         "icon":     "https://mmotimer.com/img/bulgasal_big.png",
@@ -134,54 +132,67 @@ BOSS_INFO = {
 
 # ─────────────────────────────────────────────
 #  SEA BOSS SCHEDULE  (UTC+8 / WITA)
+#  Corrected against official Garmoth.com timetable screenshot
 #  day: 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
-#  LOML bosses share slots alongside classic bosses each day.
-#  Source: Garmoth.com / mmotimer.com SEA + Pearl Abyss Asia patch notes
 # ─────────────────────────────────────────────
 SEA_SCHEDULE = [
     # ── Monday ──────────────────────────────────────────────────────────
-    {"day": 0, "hour":  0, "min":  0, "bosses": ["Kutum",   "Nouver",   "Bulgasal"]},
-    {"day": 0, "hour":  1, "min": 30, "bosses": ["Kutum",   "Uturi"]},
-    {"day": 0, "hour": 11, "min":  0, "bosses": ["Kzarka",  "Nouver",   "Sangoon"]},
-    {"day": 0, "hour": 15, "min":  0, "bosses": ["Kutum",   "Nouver",   "Golden Pig King"]},
-    {"day": 0, "hour": 20, "min":  0, "bosses": ["Kzarka",  "Karanda"]},
+    {"day": 0, "hour":  1, "min": 30, "bosses": ["Karanda",  "Bulgasal"]},
+    {"day": 0, "hour": 11, "min":  0, "bosses": ["Kzarka",   "Uturi"]},
+    {"day": 0, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 0, "hour": 15, "min":  0, "bosses": ["Kutum",    "Golden Pig King"]},
+    {"day": 0, "hour": 20, "min":  0, "bosses": ["Karanda",  "Sangoon"]},
+    {"day": 0, "hour": 23, "min": 15, "bosses": ["Garmoth"]},
     # ── Tuesday ─────────────────────────────────────────────────────────
-    {"day": 1, "hour":  0, "min":  0, "bosses": ["Offin",   "Bulgasal"]},
-    {"day": 1, "hour":  1, "min": 30, "bosses": ["Nouver",  "Uturi"]},
-    {"day": 1, "hour": 11, "min":  0, "bosses": ["Kutum",   "Karanda",  "Sangoon"]},
-    {"day": 1, "hour": 15, "min":  0, "bosses": ["Kutum",   "Kzarka",   "Golden Pig King"]},
-    {"day": 1, "hour": 20, "min":  0, "bosses": ["Quint",   "Muraka"]},
+    {"day": 1, "hour":  1, "min": 30, "bosses": ["Nouver",   "Sangoon"]},
+    {"day": 1, "hour": 11, "min":  0, "bosses": ["Kutum",    "Golden Pig King"]},
+    {"day": 1, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 1, "hour": 15, "min":  0, "bosses": ["Kzarka",   "Sangoon"]},
+    {"day": 1, "hour": 19, "min":  0, "bosses": ["Quint",    "Muraka"]},
+    {"day": 1, "hour": 20, "min":  0, "bosses": ["Kzarka",   "Uturi"]},
+    {"day": 1, "hour": 23, "min": 15, "bosses": ["Garmoth"]},
+    {"day": 1, "hour": 23, "min": 30, "bosses": ["Nouver",   "Bulgasal"]},
     # ── Wednesday ───────────────────────────────────────────────────────
-    {"day": 2, "hour":  0, "min":  0, "bosses": ["Garmoth", "Bulgasal"]},
-    {"day": 2, "hour":  1, "min": 30, "bosses": ["Kzarka",  "Offin",    "Uturi"]},
-    {"day": 2, "hour": 11, "min":  0, "bosses": ["Nouver",  "Kutum",    "Sangoon"]},
-    {"day": 2, "hour": 15, "min":  0, "bosses": ["Karanda", "Kzarka",   "Golden Pig King"]},
-    {"day": 2, "hour": 20, "min":  0, "bosses": ["Kutum",   "Nouver"]},
+    {"day": 2, "hour":  1, "min": 30, "bosses": ["Offin",    "Golden Pig King"]},
+    {"day": 2, "hour": 11, "min":  0, "bosses": ["Nouver",   "Bulgasal"]},
+    {"day": 2, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 2, "hour": 15, "min":  0, "bosses": ["Karanda",  "Uturi"]},
+    {"day": 2, "hour": 20, "min":  0, "bosses": ["Kutum",    "Bulgasal"]},
+    {"day": 2, "hour": 23, "min": 15, "bosses": ["Garmoth"]},
     # ── Thursday ────────────────────────────────────────────────────────
-    {"day": 3, "hour":  0, "min":  0, "bosses": ["Vell",    "Bulgasal"]},
-    {"day": 3, "hour":  1, "min": 30, "bosses": ["Kutum",   "Uturi"]},
-    {"day": 3, "hour": 11, "min":  0, "bosses": ["Karanda", "Kzarka",   "Sangoon"]},
-    {"day": 3, "hour": 15, "min":  0, "bosses": ["Kutum",   "Nouver",   "Golden Pig King"]},
-    {"day": 3, "hour": 20, "min":  0, "bosses": ["Karanda", "Nouver"]},
+    {"day": 3, "hour":  0, "min":  0, "bosses": ["Vell"]},
+    {"day": 3, "hour":  1, "min": 30, "bosses": ["Kutum",    "Uturi"]},
+    {"day": 3, "hour": 11, "min":  0, "bosses": ["Kzarka",   "Sangoon"]},
+    {"day": 3, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 3, "hour": 15, "min":  0, "bosses": ["Nouver",   "Golden Pig King"]},
+    {"day": 3, "hour": 20, "min":  0, "bosses": ["Kzarka",   "Sangoon"]},
+    {"day": 3, "hour": 23, "min": 15, "bosses": ["Garmoth"]},
+    {"day": 3, "hour": 23, "min": 30, "bosses": ["Karanda",  "Uturi"]},
     # ── Friday ──────────────────────────────────────────────────────────
-    {"day": 4, "hour":  0, "min":  0, "bosses": ["Garmoth", "Bulgasal"]},
-    {"day": 4, "hour":  1, "min": 30, "bosses": ["Nouver",  "Uturi"]},
-    {"day": 4, "hour": 11, "min":  0, "bosses": ["Kutum",   "Kzarka",   "Sangoon"]},
-    {"day": 4, "hour": 15, "min":  0, "bosses": ["Karanda", "Kzarka",   "Golden Pig King"]},
-    {"day": 4, "hour": 20, "min":  0, "bosses": ["Nouver",  "Kutum"]},
+    {"day": 4, "hour":  1, "min": 30, "bosses": ["Nouver",   "Sangoon"]},
+    {"day": 4, "hour": 11, "min":  0, "bosses": ["Kutum",    "Bulgasal"]},
+    {"day": 4, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 4, "hour": 15, "min":  0, "bosses": ["Karanda",  "Uturi"]},
+    {"day": 4, "hour": 20, "min":  0, "bosses": ["Nouver",   "Golden Pig King"]},
+    {"day": 4, "hour": 23, "min": 15, "bosses": ["Garmoth"]},
+    {"day": 4, "hour": 23, "min": 30, "bosses": ["Offin",    "Bulgasal"]},
     # ── Saturday ────────────────────────────────────────────────────────
-    {"day": 5, "hour":  0, "min":  0, "bosses": ["Offin",   "Bulgasal"]},
-    {"day": 5, "hour":  1, "min": 30, "bosses": ["Karanda", "Uturi"]},
-    {"day": 5, "hour": 11, "min":  0, "bosses": ["Kutum",   "Kzarka",   "Sangoon"]},
-    {"day": 5, "hour": 15, "min":  0, "bosses": ["Karanda", "Nouver",   "Golden Pig King"]},
-    {"day": 5, "hour": 16, "min":  0, "bosses": ["Garmoth"]},
-    {"day": 5, "hour": 20, "min":  0, "bosses": ["Quint",   "Muraka"]},
+    {"day": 5, "hour":  1, "min": 30, "bosses": ["Karanda",  "Golden Pig King"]},
+    {"day": 5, "hour": 11, "min":  0, "bosses": ["Karanda",  "Golden Pig King"]},
+    {"day": 5, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 5, "hour": 15, "min":  0, "bosses": ["Kutum",    "Sangoon"]},
+    {"day": 5, "hour": 18, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 5, "hour": 19, "min":  0, "bosses": ["Quint",    "Muraka"]},
+    {"day": 5, "hour": 20, "min":  0, "bosses": ["Karanda",  "Bulgasal"]},
     # ── Sunday ──────────────────────────────────────────────────────────
-    {"day": 6, "hour":  1, "min": 30, "bosses": ["Kzarka",  "Bulgasal"]},
-    {"day": 6, "hour": 11, "min":  0, "bosses": ["Nouver",  "Karanda",  "Uturi"]},
-    {"day": 6, "hour": 15, "min":  0, "bosses": ["Kutum",   "Karanda",  "Sangoon"]},
-    {"day": 6, "hour": 16, "min":  0, "bosses": ["Vell",    "Golden Pig King"]},
-    {"day": 6, "hour": 20, "min":  0, "bosses": ["Kzarka",  "Karanda"]},
+    {"day": 6, "hour":  1, "min": 30, "bosses": ["Kzarka",   "Golden Pig King"]},
+    {"day": 6, "hour": 11, "min":  0, "bosses": ["Nouver",   "Sangoon"]},
+    {"day": 6, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
+    {"day": 6, "hour": 15, "min":  0, "bosses": ["Kutum",    "Bulgasal"]},
+    {"day": 6, "hour": 16, "min":  0, "bosses": ["Vell"]},
+    {"day": 6, "hour": 20, "min": 15, "bosses": ["Kzarka",   "Uturi"]},
+    {"day": 6, "hour": 23, "min": 15, "bosses": ["Garmoth"]},
+    {"day": 6, "hour": 23, "min": 30, "bosses": ["Nouver",   "Golden Pig King"]},
 ]
 
 
@@ -207,8 +218,7 @@ def get_all_upcoming(hours_ahead=24):
 
 def build_embed(boss, spawn_dt, alert_type):
     """Build a single Discord embed for one boss at one alert level."""
-    info = BOSS_INFO.get(boss, {})
-    now  = datetime.now(UTC8)
+    info    = BOSS_INFO.get(boss, {})
     is_loml = info.get("tag") == "loml"
 
     if alert_type == 0:
@@ -292,7 +302,7 @@ def main():
         print("[INFO] Nothing to alert right now.")
         return
 
-    # Send one message per alert level (15min / 5min / now), each with its own embeds
+    # Send one message per alert level, each with its own embeds
     for alert_type in [15, 5, 0]:
         group = [(b, dt) for (b, dt, at) in triggered if at == alert_type]
         if not group:
