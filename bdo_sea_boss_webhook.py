@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
-BDO SEA World Boss Discord Webhook
-====================================
-- Alerts 15 min AND 5 min before each boss spawns (separate messages)
-- Announces the moment a boss spawns
-- Only alerts for the boss that is actually about to spawn — not all bosses at once
-- Full SEA schedule including LOML bosses (Bulgasal, Uturi, Sangoon, Golden Pig King)
-- Cron-safe: designed to run every 5 minutes via GitHub Actions
+BDO SEA World Boss Discord Webhook — Persistent Scheduler
+===========================================================
+- Runs 24/7 as a persistent process (Railway, VPS, etc.)
+- Calculates the EXACT next alert time and sleeps until then
+- No cron dependency — precise to the second
+- Alerts 15 min AND 5 min before each boss spawns, plus spawn announcement
+- Full SEA schedule including LOML bosses
 
 SETUP:
-  1. Set DISCORD_WEBHOOK_URL env var (or paste it below)
-  2. GitHub Actions cron:  */5 * * * *
-  3. pip install requests
+  1. Set DISCORD_WEBHOOK_URL env var
+  2. pip install requests
+  3. python bdo_sea_boss_webhook.py   ← runs forever
 """
 
 import os
+import time
+import logging
 import requests
 from datetime import datetime, timedelta, timezone
 
@@ -23,15 +25,21 @@ from datetime import datetime, timedelta, timezone
 # ─────────────────────────────────────────────
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "YOUR_DISCORD_WEBHOOK_URL_HERE")
 
-# Alert windows in minutes — script checks each one every run
-ALERT_WINDOWS = [15, 5, 0]   # 0 = "spawning now"
+# Alert windows in minutes before spawn
+ALERT_WINDOWS = [15, 5, 0]   # 0 = spawning now
 
-# Tolerance in seconds: how far off the cron can be and still trigger
-# 150s = ±2.5 min, safe for a 5-min cron that may run slightly late
-TOLERANCE = 150
-
-# UTC+8 (SEA / WITA)
+# UTC+8 (SEA / Philippine Time / WITA)
 UTC8 = timezone(timedelta(hours=8))
+
+# ─────────────────────────────────────────────
+#  LOGGING
+# ─────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+log = logging.getLogger(__name__)
 
 # ─────────────────────────────────────────────
 #  BOSS METADATA
@@ -114,11 +122,24 @@ BOSS_INFO = {
         "drops":    "Flame of the Primordial ★, Primordial Crystal, Asadal Belt, Gold Bars",
         "tag":      "loml",
     },
+    "Quint": {
+        "color":    0x7F8C8D,
+        "icon":     "https://mmotimer.com/img/quint_big.png",
+        "location": "Quint Hill (northern Mediah)",
+        "drops":    "Hunter Seals, Black Stones, Ancient Relic Crystal Shards",
+        "tag":      "classic",
+    },
+    "Muraka": {
+        "color":    0x795548,
+        "icon":     "https://mmotimer.com/img/muraka_big.png",
+        "location": "Muraka's Lair (northern Balenos)",
+        "drops":    "Hunter Seals, Black Stones, Ancient Relic Crystal Shards",
+        "tag":      "classic",
+    },
 }
 
 # ─────────────────────────────────────────────
-#  SEA BOSS SCHEDULE  (UTC+8 / WITA)
-#  Corrected against official Garmoth.com timetable screenshot
+#  SEA BOSS SCHEDULE  (UTC+8 / Philippine Time)
 #  day: 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
 # ─────────────────────────────────────────────
 SEA_SCHEDULE = [
@@ -182,35 +203,46 @@ SEA_SCHEDULE = [
 ]
 
 
-def get_all_upcoming(hours_ahead=24):
-    """Return all spawn slots within the next N hours."""
-    now = datetime.now(UTC8)
-    cutoff = now + timedelta(hours=hours_ahead)
-    results = []
-    for day_offset in range(8):
-        check_date = now + timedelta(days=day_offset)
-        weekday = check_date.weekday()
+# ─────────────────────────────────────────────
+#  SCHEDULE BUILDER
+# ─────────────────────────────────────────────
+def build_alert_queue(from_dt: datetime) -> list:
+    """
+    Returns a sorted list of all upcoming alert events:
+      [(alert_dt, spawn_dt, bosses, alert_min), ...]
+    Looks 8 days ahead to always have a full week buffered.
+    """
+    events = []
+    for day_offset in range(9):  # 0..8 days ahead
+        date    = from_dt + timedelta(days=day_offset)
+        weekday = date.weekday()
         for entry in SEA_SCHEDULE:
             if entry["day"] != weekday:
                 continue
-            spawn_dt = check_date.replace(
-                hour=entry["hour"], minute=entry["min"], second=0, microsecond=0
+            spawn_dt = date.replace(
+                hour=entry["hour"], minute=entry["min"],
+                second=0, microsecond=0
             )
-            if now < spawn_dt <= cutoff:
-                results.append({"dt": spawn_dt, "bosses": entry["bosses"]})
-    results.sort(key=lambda x: x["dt"])
-    return results
+            for alert_min in ALERT_WINDOWS:
+                alert_dt = spawn_dt - timedelta(minutes=alert_min)
+                if alert_dt > from_dt:  # only future alerts
+                    events.append((alert_dt, spawn_dt, entry["bosses"], alert_min))
+
+    events.sort(key=lambda x: x[0])
+    return events
 
 
-def build_embed(boss, spawn_dt, alert_type):
-    """Build a single Discord embed for one boss at one alert level."""
+# ─────────────────────────────────────────────
+#  DISCORD
+# ─────────────────────────────────────────────
+def build_embed(boss: str, spawn_dt: datetime, alert_min: int) -> dict:
     info    = BOSS_INFO.get(boss, {})
     is_loml = info.get("tag") == "loml"
 
-    if alert_type == 0:
+    if alert_min == 0:
         title     = f"🔴  {boss} IS SPAWNING NOW!"
         time_line = "**BOSS IS LIVE — Get there NOW!**"
-    elif alert_type == 5:
+    elif alert_min == 5:
         title     = f"⚠️  {boss} — 5 Minutes!"
         time_line = "Spawning in **~5 minutes**"
     else:
@@ -240,16 +272,24 @@ def build_embed(boss, spawn_dt, alert_type):
     }
 
 
-def send_embeds(embeds, content=None):
-    """POST to Discord webhook. Discord allows max 10 embeds per call."""
+def send_alert(bosses: list, spawn_dt: datetime, alert_min: int):
+    embeds = [build_embed(b, spawn_dt, alert_min) for b in bosses]
+    names  = " & ".join(bosses)
+
+    if alert_min == 0:
+        content = f"🔴 **{names}** {'is' if len(bosses) == 1 else 'are'} spawning right now!"
+    elif alert_min == 5:
+        content = f"⚠️ **{names}** {'spawns' if len(bosses) == 1 else 'spawn'} in ~5 minutes!"
+    else:
+        content = f"⏰ **{names}** in ~15 minutes."
+
     if DISCORD_WEBHOOK_URL == "YOUR_DISCORD_WEBHOOK_URL_HERE":
-        import json
-        print("[WARN] No webhook URL — preview only:")
-        print(json.dumps({"content": content, "embeds": embeds}, indent=2, default=str))
+        log.warning("No webhook URL set — skipping send.")
+        log.info(f"  Would send: {content}")
         return
 
     for i in range(0, len(embeds), 10):
-        chunk = embeds[i:i+10]
+        chunk   = embeds[i:i+10]
         payload = {
             "username":   "BDO SEA Boss Timer",
             "avatar_url": "https://garmoth.com/favicon.ico",
@@ -257,55 +297,57 @@ def send_embeds(embeds, content=None):
         }
         if content and i == 0:
             payload["content"] = content
-        resp = requests.post(
-            DISCORD_WEBHOOK_URL,
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=10,
-        )
-        if resp.status_code in (200, 204):
-            print(f"[OK] Sent {len(chunk)} embed(s).")
-        else:
-            print(f"[ERR] Discord {resp.status_code}: {resp.text}")
+
+        try:
+            resp = requests.post(
+                DISCORD_WEBHOOK_URL,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10,
+            )
+            if resp.status_code in (200, 204):
+                log.info(f"[SENT] {alert_min}min alert — {names}")
+            else:
+                log.error(f"[ERR] Discord {resp.status_code}: {resp.text}")
+        except requests.RequestException as e:
+            log.error(f"[ERR] Request failed: {e}")
 
 
+# ─────────────────────────────────────────────
+#  MAIN LOOP
+# ─────────────────────────────────────────────
 def main():
-    now = datetime.now(UTC8)
-    print(f"[INFO] {now.strftime('%A %d %b %Y %H:%M:%S')} UTC+8")
+    log.info("BDO SEA Boss Timer started (persistent scheduler)")
+    log.info("Timezone: UTC+8 (Philippine Time / WITA)")
 
-    triggered = []  # (boss, spawn_dt, alert_type)
-    upcoming  = get_all_upcoming(hours_ahead=24)
+    while True:
+        now   = datetime.now(UTC8)
+        queue = build_alert_queue(from_dt=now)
 
-    for spawn in upcoming:
-        for alert_min in ALERT_WINDOWS:
-            target_dt = spawn["dt"] - timedelta(minutes=alert_min)
-            diff = abs((now - target_dt).total_seconds())
-            if diff <= TOLERANCE:
-                for boss in spawn["bosses"]:
-                    triggered.append((boss, spawn["dt"], alert_min))
-
-    if not triggered:
-        print("[INFO] Nothing to alert right now.")
-        return
-
-    # Send one message per alert level, each with its own embeds
-    for alert_type in [15, 5, 0]:
-        group = [(b, dt) for (b, dt, at) in triggered if at == alert_type]
-        if not group:
+        if not queue:
+            log.warning("Queue empty — sleeping 60s and retrying.")
+            time.sleep(60)
             continue
 
-        names  = " & ".join(b for b, _ in group)
-        embeds = [build_embed(b, dt, alert_type) for b, dt in group]
+        # Grab the very next alert
+        alert_dt, spawn_dt, bosses, alert_min = queue[0]
+        sleep_secs = (alert_dt - now).total_seconds()
 
-        if alert_type == 0:
-            content = f"🔴 **{names}** {'is' if len(group) == 1 else 'are'} spawning right now!"
-        elif alert_type == 5:
-            content = f"⚠️ **{names}** {'spawns' if len(group) == 1 else 'spawn'} in ~5 minutes!"
-        else:
-            content = f"⏰ **{names}** in ~15 minutes."
+        label = f"{', '.join(bosses)} ({alert_min}min alert)"
+        log.info(f"Next: {label} at {alert_dt.strftime('%a %d %b %H:%M:%S')} — sleeping {sleep_secs:.1f}s")
 
-        print(f"[ALERT] {alert_type}min — {names}")
-        send_embeds(embeds, content=content)
+        # Sleep until exactly the right moment
+        if sleep_secs > 0:
+            time.sleep(sleep_secs)
+
+        # Fire the alert
+        now_check = datetime.now(UTC8)
+        drift     = abs((now_check - alert_dt).total_seconds())
+        log.info(f"Firing alert (drift: {drift:.2f}s) — {label}")
+        send_alert(bosses, spawn_dt, alert_min)
+
+        # Small buffer to avoid re-triggering the same event
+        time.sleep(2)
 
 
 if __name__ == "__main__":
