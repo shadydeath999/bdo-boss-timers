@@ -28,7 +28,7 @@ ALERT_WINDOWS = [15, 5, 0]   # 0 = "spawning now"
 
 # Tolerance in seconds: how far off the cron can be and still trigger
 # 150s = ±2.5 min, safe for a 5-min cron that may run slightly late
-TOLERANCE = 150
+TOLERANCE = 99999
 
 # UTC+8 (SEA / WITA)
 UTC8 = timezone(timedelta(hours=8))
