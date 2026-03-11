@@ -141,7 +141,6 @@ SEA_SCHEDULE = [
     {"day": 1, "hour": 11, "min":  0, "bosses": ["Kutum",    "Golden Pig King"]},
     {"day": 1, "hour": 14, "min":  0, "bosses": ["Garmoth"]},
     {"day": 1, "hour": 15, "min":  0, "bosses": ["Kzarka",   "Sangoon"]},
-    {"day": 1, "hour": 19, "min":  0, "bosses": ["Quint",    "Muraka"]},
     {"day": 1, "hour": 20, "min":  0, "bosses": ["Kzarka",   "Uturi"]},
     {"day": 1, "hour": 23, "min": 15, "bosses": ["Garmoth"]},
     {"day": 1, "hour": 23, "min": 30, "bosses": ["Nouver",   "Bulgasal"]},
