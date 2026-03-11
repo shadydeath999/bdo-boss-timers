@@ -28,7 +28,7 @@ ALERT_WINDOWS = [15, 5, 0]   # 0 = "spawning now"
 
 # Tolerance in seconds: how far off the cron can be and still trigger
 # 150s = ±2.5 min, safe for a 5-min cron that may run slightly late
-TOLERANCE = 99999
+TOLERANCE = 150
 
 # UTC+8 (SEA / WITA)
 UTC8 = timezone(timedelta(hours=8))
@@ -312,7 +312,7 @@ def main():
         embeds = [build_embed(b, dt, alert_type) for b, dt in group]
 
         if alert_type == 0:
-            content = f"@here 🔴 **{names}** {'is' if len(group) == 1 else 'are'} spawning right now!"
+            content = f"🔴 **{names}** {'is' if len(group) == 1 else 'are'} spawning right now!"
         elif alert_type == 5:
             content = f"⚠️ **{names}** {'spawns' if len(group) == 1 else 'spawn'} in ~5 minutes!"
         else:
